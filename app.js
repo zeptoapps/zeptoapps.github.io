@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
       newOrderConfirmation: {
         value: ``,
         search:
-          /{% if line\.variant\.title != 'Default Title' %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">• <\/span>\s*{% endif %})?\s*{% endif %}(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">SKU:\s*{{ line\.sku }}<\/span>\s*{% endif %})?/gim,
+          /{% if line\.variant\.title != 'Default Title' and line\.bundle_parent\? == false %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">• \s*<\/span>\s*{% endif %})?\s*{% elsif line\.variant\.title != 'Default Title' and line\.bundle_parent\? and expand_bundles == false %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">• \s*<\/span>\s*{% endif %})?\s*{% endif %}\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">SKU:\s*{{ line\.sku }}<\/span>\s*{% endif %})?/gim,
         replace: `
         {% if line.variant.title != 'Default Title' %}
         <span class="order-list__item-variant">{{ line.variant.title }}
