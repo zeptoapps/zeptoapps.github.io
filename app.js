@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
       orderConfirmation: {
         value: ``,
         search:
-          /{% if line\.variant\.title != 'Default Title' and line\.bundle_parent\? == false %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*<br\/>\s*{% elsif line\.variant\.title != 'Default Title' and line\.bundle_parent\? and expand_bundles == false %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*<br\/>\s*{% endif %}/gim,
+          /{%\s*if\s+line\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+is_parent\s*==\s*false\s*%}(?:\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.variant\.title\s*}}\s*<\/span>\s*<br\/>\s*)?{%\s*elsif\s+line\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+line\.nested_line_parent\?\s*%}(?:\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.variant\.title\s*}}\s*<\/span>\s*<br\/>\s*)?{%\s*elsif\s+line\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+line\.bundle_parent\?\s+and\s+false\s*==\s*false\s*%}(?:\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.variant\.title\s*}}\s*<\/span>\s*<br\/>\s*)?{%\s*endif\s*%}/gim,
         replace: `
         {% if line.variant.title != 'Default Title' %}
           <span class="order-list__item-variant">{{ line.variant.title }}
@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shippingConfirmation: {
         value: ``,
         search:
-          /{% if line\.line_item\.product\.title %}\s*{% assign line_title = line\.line_item\.product\.title %}\s*{% else %}\s*{% assign line_title = line\.line_item\.title %}\s*{% endif %}/gim,
+          /\{%\s*elsif\s+line\.line_item\.title\s*%\}(?:\s*{%\s*assign\s+line_title\s*=\s*line\.line_item\.title\s*%}\s*)?\{%\s*else\s*%\}(?:\s*{%\s*assign\s+line_title\s*=\s*line\.line_item\.product\.title\s*%}\s*)?\{%\s*endif\s*%\}/gim,
         replace: `
         {% if line.line_item.variant.title != 'Default Title' %}
           <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
