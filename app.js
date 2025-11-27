@@ -193,13 +193,12 @@ document.addEventListener("DOMContentLoaded", () => {
       shippingConfirmation: {
         value: ``,
         search:
-          /{%\s*if\s+line\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+is_parent\s*==\s*false\s*%}(?:\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.variant\.title\s*}}\s*<\/span>\s*<br\/>\s*)?{%\s*elsif\s+line\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+line\.nested_line_parent\?\s*%}(?:\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.variant\.title\s*}}\s*<\/span>\s*<br\/>\s*)?{%\s*elsif\s+line\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+line\.bundle_parent\?\s+and\s+false\s*==\s*false\s*%}(?:\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.variant\.title\s*}}\s*<\/span>\s*<br\/>\s*)?{%\s*endif\s*%}/gim,
+          /{%\s*if\s+line\.line_item\.variant\.title\s*!=\s*'Default\s+Title'\s+and\s+is_parent\s*==\s*false\s*%}\s*<span\s+class="order-list__item-variant">\s*{{\s*line\.line_item\.variant\.title\s*}}\s*<\/span>\s*<br\s*\/>/gim,
         replace: `
         {% if line.line_item.variant.title != 'Default Title' %}
           <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
-        {% endif %}
-  
-        {% for p in line.line_item.properties %}   
+        
+          {% for p in line.line_item.properties %}   
           {% assign hidden_property = p.first | first | replace: '_', true %}
           {% unless p.last == blank %} 
           {% if p.first contains 'pdf' %}
@@ -229,8 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
           {% endunless %}
         {% endfor %}
         `,
-      },
-    };
+    }
   
     // Check when the form is submitted
     form.addEventListener("submit", function (e) {
