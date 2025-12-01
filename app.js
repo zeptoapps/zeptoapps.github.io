@@ -198,7 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
         {% if line.line_item.variant.title != 'Default Title' %}
           <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
         
-          {% for p in line.line_item.properties %}   
+  
+        {% for p in line.line_item.properties %}   
           {% assign hidden_property = p.first | first | replace: '_', true %}
           {% unless p.last == blank %} 
           {% if p.first contains 'pdf' %}
@@ -228,7 +229,8 @@ document.addEventListener("DOMContentLoaded", () => {
           {% endunless %}
         {% endfor %}
         `,
-    }
+      },
+    };
   
     // Check when the form is submitted
     form.addEventListener("submit", function (e) {
