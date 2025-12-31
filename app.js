@@ -16,26 +16,40 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 6000);
     }
   
-    // generator function
+function applyReplace(value, regex, repl) {
+  if (!regex) return { value, changed: false };
+
+  // critical: reset lastIndex for /g regex
+  regex.lastIndex = 0;
+  const matched = regex.test(value);
+
+  if (!matched) return { value, changed: false };
+
+  // reset again before replace
+  regex.lastIndex = 0;
+  return { value: value.replace(regex, repl), changed: true };
+}
+
 function generator(template, name) {
   template.value = textarea.value.toString();
   let value = template.value;
 
   let didChange = false;
 
-  // 1) main replace (existing behavior)
-  if (template.search && template.replace && template.search.test(value)) {
-    value = value.replace(template.search, template.replace);
-    didChange = true;
+  // 1) main replace
+  if (template.search && template.replace) {
+    const r1 = applyReplace(value, template.search, template.replace);
+    value = r1.value;
+    didChange = didChange || r1.changed;
   }
 
-  // 2) extra patches (new behavior)
+  // 2) extra patches
   if (Array.isArray(template.extra_patches)) {
     template.extra_patches.forEach((p) => {
-      if (p.search && p.search.test(value)) {
-        value = value.replace(p.search, p.replace); // replace can be string OR function
-        didChange = true;
-      }
+      if (!p.search || !p.replace) return;
+      const r = applyReplace(value, p.search, p.replace);
+      value = r.value;
+      didChange = didChange || r.changed;
     });
   }
 
@@ -46,6 +60,7 @@ function generator(template, name) {
     showFeedback("alert-danger", `😞 Sorry, not a ${name} template`);
   }
 }
+
 
   
     // Data store
@@ -93,46 +108,43 @@ function generator(template, name) {
         {% endfor %}
         `,
             extra_patches: [
-              {
-                // matches:
-                // {% if component.variant.title != 'Default Title' %} ... {% endif %}
-                // {% if line.variant.title != 'Default Title' %} ... {% endif %}
-                search: /({%\s*if\s+(line|component)\.variant\.title\s*!=\s*'Default\s+Title'\s*%}[\s\S]*?{%\s*endif\s*%})/gim,
-            
-                // append (do NOT replace the original block)
-                replace: (fullMatch, wholeBlock, ctx) => {
-                  return wholeBlock + `
-            {% for property in ${ctx}.properties %}
-              {%- assign prop_name  = property.name  | default: property.first -%}
-              {%- assign prop_value = property.value | default: property.last  -%}
-            
-              {%- assign first_two = prop_name | slice: 0, 2 -%}
-            
-              {%- if prop_value != blank and first_two != '__' -%}
-                {%- assign label = prop_name | remove_first: '_' | replace: '_', ' ' -%}
-                <span style="width: 100%;display: inline-block;font-size: 14px;">{{ label }}:
-                  {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
-                    {%- assign format = 'jpg' -%}
-                    {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
-                    {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
-            
-                    <a target="_blank"
-                       href="{{ prop_value }}?format={{ format }}"
-                       class="jslghtbx-thmb"
-                       data-jslghtbx
-                       download>
-                      Download {{ format }} file
-                    </a>
-                  {%- else -%}
-                    {{ prop_value | newline_to_br }}
-                  {%- endif -%}
-                </span>
-              {%- endif -%}
-            {% endfor %}
-            `;
-                },
-              },
-            ],
+  {
+    // Match exactly the "variant title" block for line OR component
+    // and append our properties block right after it.
+    search: /{%\s*if\s+(line|component)\.variant\.title\s*!=\s*'Default\s+Title'\s*%}\s*<span\s+class="order-list__item-variant">\s*{{\s*\1\.variant\.title\s*}}\s*<\/span>\s*{%\s*endif\s*%}(?![\s\S]*?ZPPLR_PROPS_BLOCK)/gim,
+
+    // replacement function => keep the original match, then append
+    replace: (match, ctx) => {
+      return match + `
+{%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
+{% for property in ${ctx}.properties %}
+  {%- assign prop_name  = property.name  | default: property.first -%}
+  {%- assign prop_value = property.value | default: property.last  -%}
+  {%- assign first_two = prop_name | slice: 0, 2 -%}
+
+  {%- if prop_value != blank and first_two != '__' -%}
+    {%- assign label = prop_name | remove_first: '_' | replace: '_', ' ' -%}
+    <span style="width: 100%;display: inline-block;font-size: 14px;">{{ label }}:
+      {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
+        {%- assign format = 'jpg' -%}
+        {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
+        {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
+        <a target="_blank"
+           href="{{ prop_value }}?format={{ format }}"
+           class="jslghtbx-thmb"
+           data-jslghtbx
+           download>Download {{ format }} file</a>
+      {%- else -%}
+        {{ prop_value | newline_to_br }}
+      {%- endif -%}
+    </span>
+  {%- endif -%}
+{% endfor %}
+`;
+    },
+  },
+],
+
 
       },
       // packing slip
