@@ -123,7 +123,7 @@ function generator(template, name) {
   {%- assign first_two = prop_name | slice: 0, 2 -%}
 
   {%- if prop_value != blank and first_two != '__' -%}
-    {%- assign label = prop_name | remove_first: '_' | replace: '_', ' ' -%}
+    {%- assign label = prop_name | remove_first: '_'  -%}
     <span style="width: 100%;display: inline-block;font-size: 14px;">{{ label }}:
       {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
         {%- assign format = 'jpg' -%}
