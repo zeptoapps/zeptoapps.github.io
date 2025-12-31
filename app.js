@@ -17,24 +17,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     // generator function
-    function generator(template, name) {
-      template.value = textarea.value.toString();
-      let value = template.value;
-      let regex = template.search;
-      let replace = template.replace;
-  
-      // check if its a valid template
-      if (value.match(regex) != null) {
-        let replaced = value.replace(regex, replace);
-        textarea.value = replaced;
-        showFeedback(
-          "alert-success",
-          "✌ Sucessfully added Product Personalizer code"
-        );
-      } else {
-        showFeedback("alert-danger", `😞 Sorry, not a ${name} template`);
+function generator(template, name) {
+  template.value = textarea.value.toString();
+  let value = template.value;
+
+  let didChange = false;
+
+  // 1) main replace (existing behavior)
+  if (template.search && template.replace && template.search.test(value)) {
+    value = value.replace(template.search, template.replace);
+    didChange = true;
+  }
+
+  // 2) extra patches (new behavior)
+  if (Array.isArray(template.extra_patches)) {
+    template.extra_patches.forEach((p) => {
+      if (p.search && p.search.test(value)) {
+        value = value.replace(p.search, p.replace); // replace can be string OR function
+        didChange = true;
       }
-    }
+    });
+  }
+
+  if (didChange) {
+    textarea.value = value;
+    showFeedback("alert-success", "✌ Sucessfully added Product Personalizer code");
+  } else {
+    showFeedback("alert-danger", `😞 Sorry, not a ${name} template`);
+  }
+}
+
   
     // Data store
     let state = {
@@ -81,16 +93,15 @@ document.addEventListener("DOMContentLoaded", () => {
         {% endfor %}
         `,
             extra_patches: [
-    {
-      // matches BOTH line.variant.title and component.variant.title blocks
-      search:
-        /{%\s*if\s+(line|component)\.variant\.title\s*!=\s*'Default\s+Title'\s*%}\s*<span\s+class="order-list__item-variant">\s*{{\s*\1\.variant\.title\s*}}\s*<\/span>\s*{%\s*endif\s*%}/gim,
-
-      // use a function so we can inject line vs component correctly
-      replace: (matched, ctx) => {
-        return (
-          matched +
-          `
+              {
+                // matches:
+                // {% if component.variant.title != 'Default Title' %} ... {% endif %}
+                // {% if line.variant.title != 'Default Title' %} ... {% endif %}
+                search: /({%\s*if\s+(line|component)\.variant\.title\s*!=\s*'Default\s+Title'\s*%}[\s\S]*?{%\s*endif\s*%})/gim,
+            
+                // append (do NOT replace the original block)
+                replace: (fullMatch, wholeBlock, ctx) => {
+                  return wholeBlock + `
             {% for property in ${ctx}.properties %}
               {%- assign prop_name  = property.name  | default: property.first -%}
               {%- assign prop_value = property.value | default: property.last  -%}
@@ -118,11 +129,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 </span>
               {%- endif -%}
             {% endfor %}
-            `
-                    );
-                  },
+            `;
                 },
-              ],
+              },
+            ],
+
       },
       // packing slip
       packingSlip: {
