@@ -155,6 +155,54 @@ function generator(template, name) {
         replace: `
             {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
             
+             {% for p in line_item.properties %}
+
+
+          {% assign hidden_property = p.first | first | replace: '_', true %}
+
+
+          {% unless p.last == blank %}
+
+
+          {% if hidden_property == 'true' %}
+
+
+          {% else %}
+
+
+          {{ p.first }}:
+
+
+          {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %}
+
+
+          <img style="width:50px;height:auto" src="{{ p.last }}"/>{% else %}{{ p.last | newline_to_br }}
+
+
+          {% endif %}  
+
+
+          <br> 
+
+
+          {% endif %}
+
+
+          {% endunless %}
+
+
+          {% endfor %}
+
+        `,
+      },
+
+         packingSlip_Cart_Transform: {
+        value: ``,
+        search:
+          /{% if line_item\.sku != blank %}\s*<span class="line-item-description-line">\s*{{ line_item\.sku }}\s*<\/span>\s*{% endif %}/gim,
+        replace: `
+            {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
+            
             {% for property in line_item.properties %}
               {%- assign prop_name  = property.name  | default: property.first -%}
               {%- assign prop_value = property.value | default: property.last  -%}
