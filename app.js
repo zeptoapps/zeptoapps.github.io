@@ -80,6 +80,49 @@ document.addEventListener("DOMContentLoaded", () => {
         {% endunless %}
         {% endfor %}
         `,
+            extra_patches: [
+    {
+      // matches BOTH line.variant.title and component.variant.title blocks
+      search:
+        /{%\s*if\s+(line|component)\.variant\.title\s*!=\s*'Default\s+Title'\s*%}\s*<span\s+class="order-list__item-variant">\s*{{\s*\1\.variant\.title\s*}}\s*<\/span>\s*{%\s*endif\s*%}/gim,
+
+      // use a function so we can inject line vs component correctly
+      replace: (matched, ctx) => {
+        return (
+          matched +
+          `
+            {% for property in ${ctx}.properties %}
+              {%- assign prop_name  = property.name  | default: property.first -%}
+              {%- assign prop_value = property.value | default: property.last  -%}
+            
+              {%- assign first_two = prop_name | slice: 0, 2 -%}
+            
+              {%- if prop_value != blank and first_two != '__' -%}
+                {%- assign label = prop_name | remove_first: '_' | replace: '_', ' ' -%}
+                <span style="width: 100%;display: inline-block;font-size: 14px;">{{ label }}:
+                  {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
+                    {%- assign format = 'jpg' -%}
+                    {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
+                    {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
+            
+                    <a target="_blank"
+                       href="{{ prop_value }}?format={{ format }}"
+                       class="jslghtbx-thmb"
+                       data-jslghtbx
+                       download>
+                      Download {{ format }} file
+                    </a>
+                  {%- else -%}
+                    {{ prop_value | newline_to_br }}
+                  {%- endif -%}
+                </span>
+              {%- endif -%}
+            {% endfor %}
+            `
+                    );
+                  },
+                },
+              ],
       },
       // packing slip
       packingSlip: {
