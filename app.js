@@ -149,7 +149,7 @@ function generator(template, name) {
         <a target="_blank"
            href="{{ prop_value }}?format={{ format }}"
            download>
-           Download {{ format }} file
+            Download {{ format }} file
         </a>
       {%- else -%}
         {{ prop_value | newline_to_br }}
