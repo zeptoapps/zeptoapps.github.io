@@ -120,55 +120,45 @@ function generator(template, name) {
 
 {%- assign has_pplr_cart_variant = false -%}
 {% for property in ${ctx}.properties %}
-  {%- assign pn = property.name | default: property.first -%}
+  {%- assign pn = property.name | default: property.first | append: '' | strip -%}
   {%- if pn == '__pplr_cart_variant' -%}
     {%- assign has_pplr_cart_variant = true -%}
   {%- endif -%}
 {% endfor %}
 
 {% for property in ${ctx}.properties %}
-  {%- assign prop_name  = property.name  | default: property.first -%}
-  {%- assign prop_value = property.value | default: property.last  -%}
-
-  {%- assign first_two = prop_name | slice: 0, 2 -%}
-  {%- assign first_one = prop_name | slice: 0, 1 -%}
-
-  {%- comment -%}
-    Determine final label + whether to hide leading-underscore properties
-  {%- endcomment -%}
+  {%- assign prop_name  = property.name  | default: property.first | append: '' | strip -%}
+  {%- assign prop_value = property.value | default: property.last  | append: '' -%}
 
   {%- assign label = prop_name -%}
-  {%- assign hide_leading_underscore = false -%}
 
+  {%- comment -%}Remove ONLY FIRST "_" if cart variant exists{%- endcomment -%}
   {%- if has_pplr_cart_variant -%}
-    {%- assign label = prop_name | remove_first: '_' -%}
-    {%- if label | slice: 0, 1 == '_' -%}
-      {%- assign hide_leading_underscore = true -%}
-    {%- endif -%}
-  {%- else -%}
-    {%- if first_one == '_' -%}
-      {%- assign hide_leading_underscore = true -%}
-    {%- endif -%}
+    {%- assign label = label | remove_first: '_' -%}
   {%- endif -%}
 
-  {%- if prop_value != blank and first_two != '__' and hide_leading_underscore == false -%}
-    <span style="width: 100%;display: inline-block;font-size: 14px;">
+  {%- comment -%}Hide if FIRST character is "_"{%- endcomment -%}
+  {%- assign first_char = label | slice: 0, 1 -%}
+  {%- assign starts_with_underscore = false -%}
+  {%- if first_char == '_' -%}
+    {%- assign starts_with_underscore = true -%}
+  {%- endif -%}
+
+  {%- if prop_value != blank and starts_with_underscore == false -%}
+    <span style="width:100%;display:inline-block;font-size:14px;">
       {{ label }}:
       {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
         {%- assign format = 'jpg' -%}
         {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
         {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
-        <a target="_blank"
-           href="{{ prop_value }}?format={{ format }}"
-           class="jslghtbx-thmb"
-           data-jslghtbx
-           download> Download {{ format }} file</a>
+        <a target="_blank" href="{{ prop_value }}?format={{ format }}" class="jslghtbx-thmb" data-jslghtbx download>
+          Download {{ format }} file
+        </a>
       {%- else -%}
         {{ prop_value | newline_to_br }}
       {%- endif -%}
     </span>
   {%- endif -%}
-
 {% endfor %}
 
 
@@ -252,17 +242,20 @@ function generator(template, name) {
   {%- comment -%}
     Remove ONLY FIRST "_" if cart variant exists
   {%- endcomment -%}
-  {%- if has_pplr_cart_variant and label | slice: 0, 1 == '_' -%}
+  {%- if has_pplr_cart_variant -%}
     {%- assign label = label | remove_first: '_' -%}
   {%- endif -%}
 
   {%- comment -%}
     Hide automatically if FIRST CHARACTER is "_"
   {%- endcomment -%}
-  {%- assign starts_with_underscore = label | slice: 0, 1 == '_' -%}
+  {%- assign first_char = label | slice: 0, 1 -%}
+  {%- assign starts_with_underscore = false -%}
+  {%- if first_char == '_' -%}
+    {%- assign starts_with_underscore = true -%}
+  {%- endif -%}
 
   {%- if prop_value != blank and starts_with_underscore == false -%}
-    {%- assign label = label | replace: '_', ' ' -%}
 
     <span class="line-item-description-line" style="font-size:14px;">
       {{ label }}:
@@ -279,8 +272,6 @@ function generator(template, name) {
     </span>
   {%- endif -%}
 {% endfor %}
-
-
 
         `,
       },
