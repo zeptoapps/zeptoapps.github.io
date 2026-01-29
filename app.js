@@ -237,32 +237,31 @@ function generator(template, name) {
 
 {%- assign has_pplr_cart_variant = false -%}
 {% for p in line_item.properties %}
-  {%- if p.first == '__pplr_cart_variant' -%}
+  {%- assign key = p.first | append: '' | strip -%}
+  {%- if key == '__pplr_cart_variant' -%}
     {%- assign has_pplr_cart_variant = true -%}
   {%- endif -%}
 {% endfor %}
 
 {% for p in line_item.properties %}
-  {%- assign prop_name  = p.first -%}
-  {%- assign prop_value = p.last  -%}
-  {%- assign first_two  = prop_name | slice: 0, 2 -%}
+  {%- assign prop_name  = p.first | append: '' | strip -%}
+  {%- assign prop_value = p.last  | append: '' -%}
 
   {%- assign label = prop_name -%}
 
   {%- comment -%}
-    If __pplr_cart_variant exists: remove ONLY 1 leading underscore (if present)
-    Else: do nothing
+    Remove ONLY FIRST "_" if cart variant exists
   {%- endcomment -%}
   {%- if has_pplr_cart_variant and label | slice: 0, 1 == '_' -%}
     {%- assign label = label | remove_first: '_' -%}
   {%- endif -%}
 
   {%- comment -%}
-    After the above, hide anything that STILL starts with "_" OR starts with "__"
+    Hide automatically if FIRST CHARACTER is "_"
   {%- endcomment -%}
   {%- assign starts_with_underscore = label | slice: 0, 1 == '_' -%}
 
-  {%- if prop_value != blank and first_two != '__' and starts_with_underscore == false -%}
+  {%- if prop_value != blank and starts_with_underscore == false -%}
     {%- assign label = label | replace: '_', ' ' -%}
 
     <span class="line-item-description-line" style="font-size:14px;">
@@ -280,6 +279,7 @@ function generator(template, name) {
     </span>
   {%- endif -%}
 {% endfor %}
+
 
 
         `,
