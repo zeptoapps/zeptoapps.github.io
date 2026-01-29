@@ -162,7 +162,7 @@ function generator(template, name) {
            href="{{ prop_value }}?format={{ format }}"
            class="jslghtbx-thmb"
            data-jslghtbx
-           download>Download {{ format }} file</a>
+           download> Download {{ format }} file</a>
       {%- else -%}
         {{ prop_value | newline_to_br }}
       {%- endif -%}
