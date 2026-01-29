@@ -233,55 +233,57 @@ function generator(template, name) {
         search: /{%\s*if\s+line_item\.sku\s*!=\s*blank\s*%}[\s\S]*?<span\s+class="line-item-description-line">[\s\S]*?{{\s*line_item\.sku\s*}}[\s\S]*?<\/span>[\s\S]*?{%\s*endif\s*%}/gim,
 
         replace: `
-            {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
-            
-            {%- assign has_pplr_cart_variant = false -%}
-            {% for p in line_item.properties %}
-              {%- assign pn = p.name | default: p.first -%}
-              {%- if pn == '__pplr_cart_variant' -%}
-                {%- assign has_pplr_cart_variant = true -%}
-              {%- endif -%}
-            {% endfor %}
-            
-            {% for property in line_item.properties %}
-              {%- assign prop_name  = property.name  | default: property.first -%}
-              {%- assign prop_value = property.value | default: property.last  -%}
-              {%- assign first_two  = prop_name | slice: 0, 2 -%}
-              {%- assign first_one  = prop_name | slice: 0, 1 -%}
-            
-              {%- assign label = prop_name -%}
-              {%- assign hide_leading_underscore = false -%}
-            
-              {%- if has_pplr_cart_variant -%}
-                {%- assign label = prop_name | remove_first: '_' -%}
-                {%- if label | slice: 0, 1 == '_' -%}
-                  {%- assign hide_leading_underscore = true -%}
-                {%- endif -%}
-              {%- else -%}
-                {%- if first_one == '_' -%}
-                  {%- assign hide_leading_underscore = true -%}
-                {%- endif -%}
-              {%- endif -%}
-            
-              {%- if prop_value != blank and first_two != '__' and hide_leading_underscore == false -%}
-                {%- assign label = label | replace: '_', ' ' -%}
-            
-                <span class="line-item-description-line" style="font-size:14px;">
-                  {{ label }}:
-                  {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
-                    {%- assign format = 'jpg' -%}
-                    {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
-                    {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
-            
-                    <a target="_blank" href="{{ prop_value }}?format={{ format }}" download>
-                      Download {{ format }} file
-                    </a>
-                  {%- else -%}
-                    {{ prop_value | newline_to_br }}
-                  {%- endif -%}
-                </span>
-              {%- endif -%}
-            {% endfor %}
+{%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
+
+{%- assign has_pplr_cart_variant = false -%}
+{% for p in line_item.properties %}
+  {%- assign pn = p.first -%}
+  {%- if pn == '__pplr_cart_variant' -%}
+    {%- assign has_pplr_cart_variant = true -%}
+  {%- endif -%}
+{% endfor %}
+
+{% for p in line_item.properties %}
+  {%- assign prop_name  = p.first -%}
+  {%- assign prop_value = p.last  -%}
+
+  {%- assign first_two = prop_name | slice: 0, 2 -%}
+  {%- assign first_one = prop_name | slice: 0, 1 -%}
+
+  {%- assign label = prop_name -%}
+  {%- assign hide_leading_underscore = false -%}
+
+  {%- if has_pplr_cart_variant -%}
+    {%- assign label = prop_name | remove_first: '_' -%}
+    {%- if label | slice: 0, 1 == '_' -%}
+      {%- assign hide_leading_underscore = true -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- if first_one == '_' -%}
+      {%- assign hide_leading_underscore = true -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if prop_value != blank and first_two != '__' and hide_leading_underscore == false -%}
+    {%- assign label = label | replace: '_', ' ' -%}
+
+    <span class="line-item-description-line" style="font-size:14px;">
+      {{ label }}:
+      {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
+        {%- assign format = 'jpg' -%}
+        {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
+        {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
+
+        <a target="_blank" href="{{ prop_value }}?format={{ format }}" download>
+          Download {{ format }} file
+        </a>
+      {%- else -%}
+        {{ prop_value | newline_to_br }}
+      {%- endif -%}
+    </span>
+  {%- endif -%}
+{% endfor %}
+
 
 
         `,
