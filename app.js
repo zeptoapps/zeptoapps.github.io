@@ -235,16 +235,39 @@ function generator(template, name) {
         replace: `
             {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
             
+            {%- assign has_pplr_cart_variant = false -%}
+            {% for p in line_item.properties %}
+              {%- assign pn = p.name | default: p.first -%}
+              {%- if pn == '__pplr_cart_variant' -%}
+                {%- assign has_pplr_cart_variant = true -%}
+              {%- endif -%}
+            {% endfor %}
+            
             {% for property in line_item.properties %}
               {%- assign prop_name  = property.name  | default: property.first -%}
               {%- assign prop_value = property.value | default: property.last  -%}
               {%- assign first_two  = prop_name | slice: 0, 2 -%}
+              {%- assign first_one  = prop_name | slice: 0, 1 -%}
             
-              {%- if prop_value != blank and first_two != '__' -%}
-                {%- assign label = prop_name | remove_first: '_' | replace: '_', ' ' -%}
+              {%- assign label = prop_name -%}
+              {%- assign hide_leading_underscore = false -%}
+            
+              {%- if has_pplr_cart_variant -%}
+                {%- assign label = prop_name | remove_first: '_' -%}
+                {%- if label | slice: 0, 1 == '_' -%}
+                  {%- assign hide_leading_underscore = true -%}
+                {%- endif -%}
+              {%- else -%}
+                {%- if first_one == '_' -%}
+                  {%- assign hide_leading_underscore = true -%}
+                {%- endif -%}
+              {%- endif -%}
+            
+              {%- if prop_value != blank and first_two != '__' and hide_leading_underscore == false -%}
+                {%- assign label = label | replace: '_', ' ' -%}
             
                 <span class="line-item-description-line" style="font-size:14px;">
-                  {{ label }}: 
+                  {{ label }}:
                   {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
                     {%- assign format = 'jpg' -%}
                     {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
@@ -259,6 +282,7 @@ function generator(template, name) {
                 </span>
               {%- endif -%}
             {% endfor %}
+
 
         `,
       },
