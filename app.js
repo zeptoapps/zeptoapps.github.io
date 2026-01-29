@@ -237,8 +237,7 @@ function generator(template, name) {
 
 {%- assign has_pplr_cart_variant = false -%}
 {% for p in line_item.properties %}
-  {%- assign pn = p.first -%}
-  {%- if pn == '__pplr_cart_variant' -%}
+  {%- if p.first == '__pplr_cart_variant' -%}
     {%- assign has_pplr_cart_variant = true -%}
   {%- endif -%}
 {% endfor %}
@@ -246,25 +245,24 @@ function generator(template, name) {
 {% for p in line_item.properties %}
   {%- assign prop_name  = p.first -%}
   {%- assign prop_value = p.last  -%}
-
-  {%- assign first_two = prop_name | slice: 0, 2 -%}
-  {%- assign first_one = prop_name | slice: 0, 1 -%}
+  {%- assign first_two  = prop_name | slice: 0, 2 -%}
 
   {%- assign label = prop_name -%}
-  {%- assign hide_leading_underscore = false -%}
 
-  {%- if has_pplr_cart_variant -%}
-    {%- assign label = prop_name | remove_first: '_' -%}
-    {%- if label | slice: 0, 1 == '_' -%}
-      {%- assign hide_leading_underscore = true -%}
-    {%- endif -%}
-  {%- else -%}
-    {%- if first_one == '_' -%}
-      {%- assign hide_leading_underscore = true -%}
-    {%- endif -%}
+  {%- comment -%}
+    If __pplr_cart_variant exists: remove ONLY 1 leading underscore (if present)
+    Else: do nothing
+  {%- endcomment -%}
+  {%- if has_pplr_cart_variant and label | slice: 0, 1 == '_' -%}
+    {%- assign label = label | remove_first: '_' -%}
   {%- endif -%}
 
-  {%- if prop_value != blank and first_two != '__' and hide_leading_underscore == false -%}
+  {%- comment -%}
+    After the above, hide anything that STILL starts with "_" OR starts with "__"
+  {%- endcomment -%}
+  {%- assign starts_with_underscore = label | slice: 0, 1 == '_' -%}
+
+  {%- if prop_value != blank and first_two != '__' and starts_with_underscore == false -%}
     {%- assign label = label | replace: '_', ' ' -%}
 
     <span class="line-item-description-line" style="font-size:14px;">
@@ -273,7 +271,6 @@ function generator(template, name) {
         {%- assign format = 'jpg' -%}
         {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
         {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
-
         <a target="_blank" href="{{ prop_value }}?format={{ format }}" download>
           Download {{ format }} file
         </a>
@@ -283,7 +280,6 @@ function generator(template, name) {
     </span>
   {%- endif -%}
 {% endfor %}
-
 
 
         `,
