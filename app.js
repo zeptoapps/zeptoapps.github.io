@@ -419,6 +419,11 @@ function generator(template, name) {
         if (select.value == "order-confirmation") {
           generator(state.orderConfirmation, "order confirmation");
         }
+          // packing slip with cart transform
+        if (select.value == "packingSlip_Cart_Transform") {
+          generator(state.packingSlip_Cart_Transform, "packing slip cart transform");
+        }
+
         // new order confirmation
         if (select.value == "new-order-confirmation") {
           generator(state.newOrderConfirmation, "new order confirmation");
