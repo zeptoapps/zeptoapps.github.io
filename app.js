@@ -117,29 +117,48 @@ function generator(template, name) {
     replace: (match, ctx) => {
       return match + `
 {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
+
+{%- assign has_pplr_cart_variant = false -%}
+
+{% for property in ${ctx}.properties %}
+  {%- assign prop_name = property.name | default: property.first -%}
+  {%- if prop_name == '__pplr_cart_variant' -%}
+    {%- assign has_pplr_cart_variant = true -%}
+  {%- endif -%}
+{% endfor %}
+
 {% for property in ${ctx}.properties %}
   {%- assign prop_name  = property.name  | default: property.first -%}
   {%- assign prop_value = property.value | default: property.last  -%}
   {%- assign first_two = prop_name | slice: 0, 2 -%}
 
   {%- if prop_value != blank and first_two != '__' -%}
-    {%- assign label = prop_name | remove_first: '_'  -%}
-    <span style="width: 100%;display: inline-block;font-size: 14px;">{{ label }}:
+
+    {%- if has_pplr_cart_variant -%}
+      {%- assign label = prop_name | remove_first: '_' -%}
+    {%- else -%}
+      {%- assign label = prop_name -%}
+    {%- endif -%}
+
+    <span style="width:100%;display:inline-block;font-size:14px;">
+      {{ label }}:
       {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
         {%- assign format = 'jpg' -%}
         {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
         {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
         <a target="_blank"
            href="{{ prop_value }}?format={{ format }}"
-           class="jslghtbx-thmb"
-           data-jslghtbx
-           download> Download {{ format }} file</a>
+           download>
+           Download {{ format }} file
+        </a>
       {%- else -%}
         {{ prop_value | newline_to_br }}
       {%- endif -%}
     </span>
+
   {%- endif -%}
 {% endfor %}
+
 `;
     },
   },
