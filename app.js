@@ -119,10 +119,9 @@ function generator(template, name) {
 {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
 
 {%- assign has_pplr_cart_variant = false -%}
-
 {% for property in ${ctx}.properties %}
-  {%- assign prop_name = property.name | default: property.first -%}
-  {%- if prop_name == '__pplr_cart_variant' -%}
+  {%- assign pn = property.name | default: property.first -%}
+  {%- if pn == '__pplr_cart_variant' -%}
     {%- assign has_pplr_cart_variant = true -%}
   {%- endif -%}
 {% endfor %}
@@ -130,17 +129,30 @@ function generator(template, name) {
 {% for property in ${ctx}.properties %}
   {%- assign prop_name  = property.name  | default: property.first -%}
   {%- assign prop_value = property.value | default: property.last  -%}
+
   {%- assign first_two = prop_name | slice: 0, 2 -%}
+  {%- assign first_one = prop_name | slice: 0, 1 -%}
 
-  {%- if prop_value != blank and first_two != '__' -%}
+  {%- comment -%}
+    Determine final label + whether to hide leading-underscore properties
+  {%- endcomment -%}
 
-    {%- if has_pplr_cart_variant -%}
-      {%- assign label = prop_name | remove_first: '_' -%}
-    {%- else -%}
-      {%- assign label = prop_name -%}
+  {%- assign label = prop_name -%}
+  {%- assign hide_leading_underscore = false -%}
+
+  {%- if has_pplr_cart_variant -%}
+    {%- assign label = prop_name | remove_first: '_' -%}
+    {%- if label | slice: 0, 1 == '_' -%}
+      {%- assign hide_leading_underscore = true -%}
     {%- endif -%}
+  {%- else -%}
+    {%- if first_one == '_' -%}
+      {%- assign hide_leading_underscore = true -%}
+    {%- endif -%}
+  {%- endif -%}
 
-    <span style="width:100%;display:inline-block;font-size:14px;">
+  {%- if prop_value != blank and first_two != '__' and hide_leading_underscore == false -%}
+    <span style="width: 100%;display: inline-block;font-size: 14px;">
       {{ label }}:
       {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
         {%- assign format = 'jpg' -%}
@@ -148,16 +160,17 @@ function generator(template, name) {
         {%- if prop_value contains '.pdf' -%}{%- assign format = 'pdf' -%}{%- endif -%}
         <a target="_blank"
            href="{{ prop_value }}?format={{ format }}"
-           download>
-            Download {{ format }} file
-        </a>
+           class="jslghtbx-thmb"
+           data-jslghtbx
+           download>Download {{ format }} file</a>
       {%- else -%}
         {{ prop_value | newline_to_br }}
       {%- endif -%}
     </span>
-
   {%- endif -%}
+
 {% endfor %}
+
 
 `;
     },
