@@ -133,7 +133,7 @@ function generator(template, name) {
            href="{{ prop_value }}?format={{ format }}"
            class="jslghtbx-thmb"
            data-jslghtbx
-           download>Download {{ format }} file</a>
+           download> Download {{ format }} file</a>
       {%- else -%}
         {{ prop_value | newline_to_br }}
       {%- endif -%}
@@ -212,7 +212,7 @@ function generator(template, name) {
                 {%- assign label = prop_name | remove_first: '_' | replace: '_', ' ' -%}
             
                 <span class="line-item-description-line" style="font-size:14px;">
-                  {{ label }}:
+                  {{ label }}: 
                   {%- if prop_value contains '/uploads/' or prop_value contains '/assets/' or prop_value contains '/products/' -%}
                     {%- assign format = 'jpg' -%}
                     {%- if prop_value contains '.png' -%}{%- assign format = 'png' -%}{%- endif -%}
