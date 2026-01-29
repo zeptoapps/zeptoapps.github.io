@@ -230,8 +230,8 @@ function generator(template, name) {
 
          packingSlip_Cart_Transform: {
         value: ``,
-        search:
-          /{% if line_item\.sku != blank %}\s*<span class="line-item-description-line">\s*{{ line_item\.sku }}\s*<\/span>\s*{% endif %}/gim,
+        search: /{%\s*if\s+line_item\.sku\s*!=\s*blank\s*%}[\s\S]*?<span\s+class="line-item-description-line">[\s\S]*?{{\s*line_item\.sku\s*}}[\s\S]*?<\/span>[\s\S]*?{%\s*endif\s*%}/gim,
+
         replace: `
             {%- comment -%}ZPPLR_PROPS_BLOCK{%- endcomment -%}
             
