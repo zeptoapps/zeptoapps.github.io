@@ -76,35 +76,50 @@ function generator(template, name) {
           </span>
           <br/>
         {% endif %}
+
+        {% assign has_new_prop = false %}
+        {% for p in line.properties %}
+          {% if p.first | slice: 0, 2 == '__' %}
+            {% assign has_new_prop = true %}
+          {% endif %}
+        {% endfor %}
   
         {% for p in line.properties %}   
-        {% assign hidden_property = p.first | first | replace: '_', true %}
-        {% unless p.last == blank %} 
-        {% if p.first contains 'pdf' %}
-        {% assign hidden_property = false%}
-        {% assign p.first = p.first | replace: '_' %}
-        {% endif %} 
-        {% if hidden_property == 'true' %} 
-        <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ p.first }}">{{ p.first }}: {{ p.last }}
-        </span> 
-        {% else %} 
-        {{ p.first | replace: '_'}}: 
-        {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %} 
-        {% assign format = 'jpg' %}
-        {% if p.last contains 'png' %}
-        {% assign format = 'png' %}
-        {% endif %}
-        {% if p.last contains 'pdf' %}
-        {% assign format = 'pdf' %}
-        {% endif %}
-        <a target="_blank"  href="{{ p.last }}?format={{ format }}" src="{{ p.last }}?format={{ format }}" class="jslghtbx-thmb" data-jslghtbx download>Download {{ format }} file
-        </a> 
-        {% else %} 
-        {{ p.last | newline_to_br }} 
-        {% endif %} 
-        <br> 
-        {% endif %} 
-        {% endunless %}
+
+          {% assign prop_name = p.first %}
+          {% if has_new_prop %}
+            {% if prop_name | slice: 0, 1 == '_' %}
+              {% assign prop_name = prop_name | slice: 1, prop_name.size %}
+            {% endif %}
+          {% endif %}
+
+          {% assign hidden_property = prop_name | first | replace: '_', true %}
+          {% unless p.last == blank %} 
+          {% if prop_name contains 'pdf' %}
+          {% assign hidden_property = false%}
+          {% assign prop_name = prop_name | replace: '_' %}
+          {% endif %} 
+          {% if hidden_property == 'true' %} 
+          <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ prop_name }}">{{ prop_name }}: {{ p.last }}
+          </span> 
+          {% else %} 
+          {{ prop_name | replace: '_'}}: 
+          {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %} 
+          {% assign format = 'jpg' %}
+          {% if p.last contains 'png' %}
+          {% assign format = 'png' %}
+          {% endif %}
+          {% if p.last contains 'pdf' %}
+          {% assign format = 'pdf' %}
+          {% endif %}
+          <a target="_blank"  href="{{ p.last }}?format={{ format }}" src="{{ p.last }}?format={{ format }}" class="jslghtbx-thmb" data-jslghtbx download>Download {{ format }} file
+          </a> 
+          {% else %} 
+          {{ p.last | newline_to_br }} 
+          {% endif %} 
+          <br> 
+          {% endif %} 
+          {% endunless %}
         {% endfor %}
         `,
             extra_patches: [
@@ -292,34 +307,50 @@ function generator(template, name) {
         search: /<p>\s*Variant Title:\s*{{ line\.line_item\.title }}\s*<\/p>/gim,
         replace: `
         <p>Variant Title: {{ line.line_item.title }}</p>
+
+        {% assign has_new_prop = false %}
+        {% for p in line.line_item.properties %}
+          {% if p.first | slice: 0, 2 == '__' %}
+            {% assign has_new_prop = true %}
+          {% endif %}
+        {% endfor %}
+
         {% for p in line.line_item.properties %}   
-        {% assign hidden_property = p.first | first | replace: '_', true %}
-        {% unless p.last == blank %} 
-        {% if p.first contains 'pdf' %}
-        {% assign hidden_property = false%}
-        {% assign p.first = p.first | replace: '_' %}
-        {% endif %} 
-        {% if hidden_property == 'true' %} 
-        <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ p.first }}">{{ p.first }}: {{ p.last }}
-        </span> 
-        {% else %} 
-        {{ p.first | replace: '_'}}: 
-        {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %} 
-        {% assign format = 'jpg' %}
-        {% if p.last contains 'png' %}
-        {% assign format = 'png' %}
-        {% endif %}
-        {% if p.last contains 'pdf' %}
-        {% assign format = 'pdf' %}
-        {% endif %}
-        <a target="_blank"  href="{{ p.last }}?format={{ format }}" src="{{ p.last }}?format={{ format }}" class="jslghtbx-thmb" data-jslghtbx download>Download {{ format }} file
-        </a> 
-        {% else %} 
-        {{ p.last | newline_to_br }} 
-        {% endif %} 
-        <br> 
-        {% endif %} 
-        {% endunless %}
+
+          {% assign prop_name = p.first %}
+          {% if has_new_prop %}
+            {% if prop_name | slice: 0, 1 == '_' %}
+              {% assign prop_name = prop_name | slice: 1, prop_name.size %}
+            {% endif %}
+          {% endif %}
+
+          {% assign hidden_property = prop_name | first | replace: '_', true %}
+          {% unless p.last == blank %} 
+          {% if prop_name contains 'pdf' %}
+          {% assign hidden_property = false%}
+          {% assign prop_name = prop_name | replace: '_' %}
+          {% endif %} 
+          {% if hidden_property == 'true' %} 
+          <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ prop_name }}">{{ prop_name }}: {{ p.last }}
+          </span> 
+          {% else %} 
+          {{ prop_name | replace: '_'}}: 
+          {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %} 
+          {% assign format = 'jpg' %}
+          {% if p.last contains 'png' %}
+          {% assign format = 'png' %}
+          {% endif %}
+          {% if p.last contains 'pdf' %}
+          {% assign format = 'pdf' %}
+          {% endif %}
+          <a target="_blank"  href="{{ p.last }}?format={{ format }}" src="{{ p.last }}?format={{ format }}" class="jslghtbx-thmb" data-jslghtbx download>Download {{ format }} file
+          </a> 
+          {% else %} 
+          {{ p.last | newline_to_br }} 
+          {% endif %} 
+          <br> 
+          {% endif %} 
+          {% endunless %}
         {% endfor %}
         `,
       },
@@ -337,18 +368,34 @@ function generator(template, name) {
         </span>
         {% endif %}
         {% endif %}
+
+        {% assign has_new_prop = false %}
+        {% for p in line.properties %} 
+          {% if p.first | slice: 0, 2 == '__' %}
+            {% assign has_new_prop = true %}
+          {% endif %}
+        {% endfor %}
+
         {% for p in line.properties %}   
-        {% assign hidden_property = p.first | first | replace: '_', true %}
+
+        {% assign prop_name = p.first %}
+        {% if has_new_prop %}
+          {% if prop_name | slice: 0, 1 == '_' %}
+            {% assign prop_name = prop_name | slice: 1, prop_name.size %}
+          {% endif %}
+        {% endif %}
+
+        {% assign hidden_property = prop_name | first | replace: '_', true %}
         {% unless p.last == blank %} 
-        {% if p.first contains 'pdf' %}
+        {% if prop_name contains 'pdf' %}
         {% assign hidden_property = false%}
-        {% assign p.first = p.first | replace: '_' %}
+        {% assign prop_name = prop_name | replace: '_' %}
         {% endif %} 
         {% if hidden_property == 'true' %} 
-        <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ p.first }}">{{ p.first }}: {{ p.last }}
+        <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ prop_name }}">{{ prop_name }}: {{ p.last }}
         </span> 
         {% else %} 
-        {{ p.first | replace: '_'}}: 
+        {{ prop_name | replace: '_'}}: 
         {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %} 
         {% assign format = 'jpg' %}
         {% if p.last contains 'png' %}
@@ -376,19 +423,33 @@ function generator(template, name) {
         {% if line.line_item.variant.title != 'Default Title' %}
           <span class="order-list__item-variant">{{ line.line_item.variant.title }}</span><br/>
         
+        {% assign has_new_prop = false %}
+        {% for p in line.line_item.properties %}
+          {% if p.first | slice: 0, 2 == '__' %}
+            {% assign has_new_prop = true %}
+          {% endif %}
+        {% endfor %}
   
         {% for p in line.line_item.properties %}   
-          {% assign hidden_property = p.first | first | replace: '_', true %}
+
+          {% assign prop_name = p.first %}
+          {% if has_new_prop %}
+            {% if prop_name | slice: 0, 1 == '_' %}
+              {% assign prop_name = prop_name | slice: 1, prop_name.size %}
+            {% endif %}
+          {% endif %}
+
+          {% assign hidden_property = prop_name | first | replace: '_', true %}
           {% unless p.last == blank %} 
-          {% if p.first contains 'pdf' %}
+          {% if prop_name contains 'pdf' %}
           {% assign hidden_property = false%}
-          {% assign p.first = p.first | replace: '_' %}
+          {% assign prop_name = prop_name | replace: '_' %}
           {% endif %} 
           {% if hidden_property == 'true' %} 
-          <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ p.first }}">{{ p.first }}: {{ p.last }}
+          <span style="display:none;" class="product-personalizer-line-item-prop" data-prop-name="{{ prop_name }}">{{ prop_name }}: {{ p.last }}
           </span> 
           {% else %} 
-          {{ p.first | replace: '_'}}: 
+          {{ prop_name | replace: '_'}}: 
           {% if p.last contains '/uploads/' or p.last contains '/assets/' or p.last contains '/products/' %} 
           {% assign format = 'jpg' %}
           {% if p.last contains 'png' %}
