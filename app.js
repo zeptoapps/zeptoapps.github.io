@@ -357,17 +357,21 @@ function generator(template, name) {
       // New order confirmation
       newOrderConfirmation: {
         value: ``,
-        search:
-          /{% if line\.variant\.title != 'Default Title' and line\.bundle_parent\? == false %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">• \s*<\/span>\s*{% endif %})?\s*{% elsif line\.variant\.title != 'Default Title' and line\.bundle_parent\? and expand_bundles == false %}\s*<span class="order-list__item-variant">\s*{{ line\.variant\.title }}\s*<\/span>\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">• \s*<\/span>\s*{% endif %})?\s*{% endif %}\s*(?:\n\s*{% if line\.sku != blank %}\s*<span class="order-list__item-variant">SKU:\s*{{ line\.sku }}<\/span>\s*{% endif %})?/gim,
-        replace: `
-        {% if line.variant.title != 'Default Title' %}
-        <span class="order-list__item-variant">{{ line.variant.title }}
-        </span>
-        {% if line.sku != blank %}
-        <span class="order-list__item-variant">• 
-        </span>
-        {% endif %}
-        {% endif %}
+        search: (() => {
+          const rtlOpen = String.raw`(?:{%\s*if\s+buyer_email_rtl\s*==\s*true\s*%}\s*<span[^>]*>\s*{%\s*endif\s*%})?`;
+          const rtlClose = String.raw`(?:{%\s*if\s+buyer_email_rtl\s*==\s*true\s*%}\s*<\/span>\s*{%\s*endif\s*%})?`;
+          const span = String.raw`<span\s+class="order-list__item-variant">\s*` + rtlOpen + String.raw`\s*{{\s*line\.variant\.title\s*}}\s*` + rtlClose + String.raw`\s*<\/span>\s*(?:<br\s*\/?>)?`;
+          const bullet = String.raw`(?:\s*{%\s*if\s+line\.sku\s*!=\s*blank\s*%}\s*<span\s+class="order-list__item-variant">•\s*<\/span>\s*{%\s*endif\s*%})?`;
+          const sku = String.raw`(?:\s*{%\s*if\s+line\.sku\s*!=\s*blank\s*%}\s*<span\s+class="order-list__item-variant">[^<]*SKU:\s*{{\s*line\.sku\s*}}[^<]*<\/span>\s*{%\s*endif\s*%})?`;
+          const cond = String.raw`line\.variant\.title\s*!=\s*'Default\s+Title'[^%]*%}\s*`;
+          return new RegExp(
+            String.raw`{%\s*if\s+` + cond + span + bullet +
+            String.raw`(?:\s*{%\s*elsif\s+` + cond + span + bullet + String.raw`)*` +
+            String.raw`\s*{%\s*endif\s*%}` + sku,
+            "gim"
+          );
+        })(),
+        replace: `$&
 
         {% assign has_new_prop = false %}
         {% for p in line.properties %} 
